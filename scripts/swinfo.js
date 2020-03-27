@@ -1,18 +1,34 @@
-let arrayOfObjectsWithCharactersInfo = [];
 
-// getting data from the server
-const getStarWatsCharactersInfo = async function (){ // async function always returns a promise
-    const resource = 'https://swapi.co/api/people/';
+ let arrayOfObjectsWithCharactersInfo = [];
+const getAllCharactersData =  (() => {
+    const resourceArray = [
+        'https://swapi.co/api/people/',
+        'https://swapi.co/api/people/?page=2',
+        'https://swapi.co/api/people/?page=3',
+        'https://swapi.co/api/people/?page=4',
+        'https://swapi.co/api/people/?page=5',
+        'https://swapi.co/api/people/?page=6',
+        'https://swapi.co/api/people/?page=7',
+        'https://swapi.co/api/people/?page=8',
+        'https://swapi.co/api/people/?page=9',
+    ]
+    // getting data from the server
+    const getStarWatsCharactersInfo = async function (resource){ // async function always returns a promise
+        const response = await fetch(resource); // return promise
+        const data = await response.json(); // json() is async function
+        return data.results
+    }
+    resourceArray.forEach(api => {
+        getStarWatsCharactersInfo(api).then(data => {
+            arrayOfObjectsWithCharactersInfo = [...arrayOfObjectsWithCharactersInfo,...data];
+            // console.log(arrayOfObjectsWithCharactersInfo);
+        }).catch(err => console.log(err.message));
+        return arrayOfObjectsWithCharactersInfo;
+    })
+    return { arrayOfObjectsWithCharactersInfo };
+})();
 
-    const response = await fetch(resource); // return promise
-    const data = await response.json(); // json() is async function
-    return data.results
-}
 
-getStarWatsCharactersInfo().then(data => {
-    arrayOfObjectsWithCharactersInfo = data;
-    console.log(arrayOfObjectsWithCharactersInfo);
-}).catch(err => console.log(err.message));
 
 // check if input field name match any object of an array with data
 // if match - take necessery data and display them
@@ -20,6 +36,7 @@ getStarWatsCharactersInfo().then(data => {
 const characterNameSearch = document.querySelector('#character-name');
 const searchForm = document.querySelector('.search-character');
 const infoCard = document.querySelector('.card-info');
+const alertMessage = document.querySelector('.alert-container');
 
 searchForm.addEventListener('submit', e => {
     e.preventDefault();
@@ -31,23 +48,30 @@ searchForm.addEventListener('submit', e => {
     let characterFilms = document.querySelector('.films');
     let planetName;
     let filmTitle;
+    let objectWitjInfoAboutLookingChar;
+    if(getObject(charName)){
+        objectWitjInfoAboutLookingChar = getObject(charName);
 
-    const objectWitjInfoAboutLookingChar = getObject(charName);
-    getPlanet(objectWitjInfoAboutLookingChar)
-    .then(data => {
-        console.log('Promise one resolved');
-        planetName = data.name;
-        return getFilm(objectWitjInfoAboutLookingChar)
-    }).then(data => {
-        console.log('Promise two resolved');
-        filmTitle = data.title
-        characterName.innerHTML = objectWitjInfoAboutLookingChar.name;
-        characterGender.innerHTML = objectWitjInfoAboutLookingChar.gender;
-        characterHomeWorld.innerHTML = planetName;
-        characterFilms.innerHTML = filmTitle;
-        infoCard.style.display = 'flex';
-        }).catch(err => console.log(err.message));
+        getFilm(objectWitjInfoAboutLookingChar)
+        .then(data => {
+            console.log('Promise one resolved');
+            filmTitle = data.title
+            return getPlanet(objectWitjInfoAboutLookingChar)
+        }).then(data => {
+            console.log('Promise two resolved');
+            planetName = data.name;
+            characterName.innerHTML = objectWitjInfoAboutLookingChar.name;
+            characterGender.innerHTML = objectWitjInfoAboutLookingChar.gender;
+            characterHomeWorld.innerHTML = planetName;
+            characterFilms.innerHTML = filmTitle;
+            infoCard.style.display = 'flex';
+            }).catch(err => console.log(err.message));
+    } else {
+        alertMessage.style.display = 'block'
+        setTimeout(() => {alertMessage.style.display = 'none';},2000)   
+    }
 })
+
 
 async function getPlanet (data){
     return getDetailedInfo(data.homeworld);
@@ -59,6 +83,9 @@ async function getFilm (data){
     //     arrayWithFilms.push(getDetailedInfo(film));
     //     console.log(arrayWithFilms);
     // });
+    console.log(data.films[0])
+    console.log(data.films[1])
+    console.log(data.films[2])
     return getDetailedInfo(data.films[0]);
 }
 
