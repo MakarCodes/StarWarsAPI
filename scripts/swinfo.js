@@ -21,7 +21,7 @@ const getAllCharactersData =  (() => {
     resourceArray.forEach(api => {
         getStarWatsCharactersInfo(api).then(data => {
             arrayOfObjectsWithCharactersInfo = [...arrayOfObjectsWithCharactersInfo,...data];
-            console.log(arrayOfObjectsWithCharactersInfo);
+            // console.log(arrayOfObjectsWithCharactersInfo);
         }).catch(err => console.log(err.message));
         return arrayOfObjectsWithCharactersInfo;
     })
@@ -37,47 +37,60 @@ const characterNameSearch = document.querySelector('#character-name');
 const searchForm = document.querySelector('.search-character');
 const infoCard = document.querySelector('.card-info');
 const alertMessage = document.querySelector('.alert-container');
+let characterName = document.querySelector('.char-name');
+let characterGender = document.querySelector('.char-gender');
+let characterHomeWorld = document.querySelector('.homeworld');
+const filmTitlesContainer = document.querySelector('.titles-container');
 
 searchForm.addEventListener('submit', e => {
     e.preventDefault();
     let charName = characterNameSearch.value.trim();
     searchForm.reset();
-    let characterName = document.querySelector('.char-name');
-    let characterGender = document.querySelector('.char-gender');
-    let characterHomeWorld = document.querySelector('.homeworld');
-    let characterFilms = document.querySelector('.films');
-    let planetName;
-    let filmTitle;
+    let filmsTitleArray =[];
     let objectWitjInfoAboutLookingChar;
     if(getObject(charName)){
         objectWitjInfoAboutLookingChar = getObject(charName);
-
-
-
-        getDetailedInfo(objectWitjInfoAboutLookingChar.films[0])
-        .then(data => {
-            console.log('Promise one resolved');
-            filmTitle = data.title
-            return getDetailedInfo(objectWitjInfoAboutLookingChar.homeworld)
-        }).then(data => {
-            console.log('Promise two resolved');
-            planetName = data.name;
-            characterName.innerHTML = objectWitjInfoAboutLookingChar.name;
-            characterGender.innerHTML = objectWitjInfoAboutLookingChar.gender;
-            characterHomeWorld.innerHTML = planetName;
-            characterFilms.innerHTML = filmTitle;
-            infoCard.style.display = 'flex';
-            }).catch(err => console.log(err.message));
+    // fetch on every array element! (DO NOT FETCH on whole array of elements!!)
+    Promise.all(objectWitjInfoAboutLookingChar.films
+                        .map((singleFilmUrl => fetch(singleFilmUrl)
+                        .then(response => response.json()))))
+                        .then(films => {
+                            films.forEach(film => {
+                                filmsTitleArray.push(film.title);
+                                console.log(filmsTitleArray);
+                            })
+                            return getDetailedInfo(objectWitjInfoAboutLookingChar.homeworld);
+                        }).then(planet => {
+                            updateUI(objectWitjInfoAboutLookingChar.name, objectWitjInfoAboutLookingChar.gender, planet.name, filmsTitleArray)
+                        }).catch(err => {throw new Error()});
     } else {
         alertMessage.style.display = 'block'
         setTimeout(() => {alertMessage.style.display = 'none';},2000)   
     }
 })
 
+
+function updateUI (name, gender, planet, films) {
+            document.querySelectorAll('.films').forEach(title => {
+                title.remove();
+            });
+            characterName.innerHTML = name;
+            characterGender.innerHTML = gender;
+            characterHomeWorld.innerHTML = planet;
+            films.forEach(film => {
+                const div = document.createElement('div');
+                div.classList.add('films');
+                div.innerHTML = film;
+                filmTitlesContainer.appendChild(div);
+            })
+            infoCard.style.display = 'flex';
+}
+
+
+
 const getDetailedInfo = async function (resource) {
     const response = await fetch(resource);
     const data = await response.json();
-    // console.log(data)
     return data;
 }
 
