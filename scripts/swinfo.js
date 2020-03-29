@@ -21,7 +21,7 @@ const getAllCharactersData =  (() => {
     resourceArray.forEach(api => {
         getStarWatsCharactersInfo(api).then(data => {
             arrayOfObjectsWithCharactersInfo = [...arrayOfObjectsWithCharactersInfo,...data];
-            // console.log(arrayOfObjectsWithCharactersInfo);
+            console.log(arrayOfObjectsWithCharactersInfo);
         }).catch(err => console.log(err.message));
         return arrayOfObjectsWithCharactersInfo;
     })
@@ -52,11 +52,13 @@ searchForm.addEventListener('submit', e => {
     if(getObject(charName)){
         objectWitjInfoAboutLookingChar = getObject(charName);
 
-        getFilm(objectWitjInfoAboutLookingChar)
+
+
+        getDetailedInfo(objectWitjInfoAboutLookingChar.films[0])
         .then(data => {
             console.log('Promise one resolved');
             filmTitle = data.title
-            return getPlanet(objectWitjInfoAboutLookingChar)
+            return getDetailedInfo(objectWitjInfoAboutLookingChar.homeworld)
         }).then(data => {
             console.log('Promise two resolved');
             planetName = data.name;
@@ -71,23 +73,6 @@ searchForm.addEventListener('submit', e => {
         setTimeout(() => {alertMessage.style.display = 'none';},2000)   
     }
 })
-
-
-async function getPlanet (data){
-    return getDetailedInfo(data.homeworld);
-}
-
-async function getFilm (data){
-    // let = arrayWithFilms = [];
-    // data.films.forEach( (film) =>{
-    //     arrayWithFilms.push(getDetailedInfo(film));
-    //     console.log(arrayWithFilms);
-    // });
-    console.log(data.films[0])
-    console.log(data.films[1])
-    console.log(data.films[2])
-    return getDetailedInfo(data.films[0]);
-}
 
 const getDetailedInfo = async function (resource) {
     const response = await fetch(resource);
