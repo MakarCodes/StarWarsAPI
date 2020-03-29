@@ -1,9 +1,9 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 24px;
-    height: 100vh;
     background: url(images/star-wars-background.jpg);
     background-size: cover;
+    box-sizing: border-box;
 }
 
 .wrapper {
@@ -95,4 +95,14 @@ body {
 
 }
 
+.card-info{
+    position: relative;
+    left: -1200px;
+    animation: drop 0.5s ease forwards;
+}
 
+@keyframes drop{
+    0%{opacity: 0;}
+    70%{ transform: translateX(1500px)}
+    100%{ transform: translateX(1200px); opacity: 1;}
+}

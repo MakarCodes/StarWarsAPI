@@ -57,7 +57,6 @@ searchForm.addEventListener('submit', e => {
                         .then(films => {
                             films.forEach(film => {
                                 filmsTitleArray.push(film.title);
-                                console.log(filmsTitleArray);
                             })
                             return getDetailedInfo(objectWitjInfoAboutLookingChar.homeworld);
                         }).then(planet => {
@@ -85,7 +84,6 @@ function updateUI (name, gender, planet, films) {
             })
             infoCard.style.display = 'flex';
 }
-
 
 
 const getDetailedInfo = async function (resource) {
